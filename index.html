@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اطلاعات تامین کنندگان</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for a nice Persian font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+    <div class="w-full max-w-2xl mx-auto bg-white p-8 rounded-xl shadow-lg">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-2">فرم درخواست همکاری</h1>
+        <p class="text-center text-gray-500 mb-8">لطفاً اطلاعات زیر را با دقت تکمیل نمایید.</p>
+
+        <!-- Form container -->
+        <form id="applicationForm">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Full Name Input -->
+                <div class="mb-4">
+                    <label for="fullName" class="block text-gray-700 text-sm font-bold mb-2">نام و نام خانوادگی</label>
+                    <input type="text" id="fullName" name="fullName" class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="مثال: مریم رضایی" required>
+                </div>
+
+                <!-- Email Input -->
+                <div class="mb-4">
+                    <label for="email" class="block text-gray-700 text-sm font-bold mb-2">آدرس ایمیل</label>
+                    <input type="email" id="email" name="email" class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="example@email.com" required>
+                </div>
+            </div>
+
+            <!-- Phone Number Input -->
+            <div class="mb-4">
+                <label for="phone" class="block text-gray-700 text-sm font-bold mb-2">شماره تماس</label>
+                <input type="tel" id="phone" name="phone" class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="۰۹۱۲۳۴۵۶۷۸۹" required>
+            </div>
+
+            <!-- Message Textarea -->
+            <div class="mb-6">
+                <label for="message" class="block text-gray-700 text-sm font-bold mb-2">پیام شما</label>
+                <textarea id="message" name="message" rows="5" class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="لطفاً درخواست یا پیام خود را اینجا بنویسید..."></textarea>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="flex items-center justify-center">
+                <button id="submitButton" type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg focus:outline-none focus:shadow-outline transition-all duration-300">
+                    ارسال اطلاعات
+                </button>
+            </div>
+        </form>
+
+        <!-- Success/Error Message Display -->
+        <div id="message-display" class="mt-6 text-center text-lg font-semibold"></div>
+    </div>
+
+    <script>
+        // IMPORTANT: Replace this URL with the one you get from Google Apps Script deployment
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwkp9qrRJ9Z5-VHNDDOd4dp5wfYA97hMeRxlucdQRcPuhJfn3eUlCDPWUxuflnUgWQWug/exec';
+
+        const form = document.getElementById('applicationForm');
+        const submitButton = document.getElementById('submitButton');
+        const messageDisplay = document.getElementById('message-display');
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault(); // Prevent the default form submission
+
+            // Show a loading state
+            submitButton.disabled = true;
+            submitButton.textContent = 'در حال ارسال...';
+            messageDisplay.textContent = '';
+            messageDisplay.className = '';
+
+            const formData = new FormData(form);
+
+            // Send the data using fetch
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.result === 'success') {
+                    // Handle success
+                    messageDisplay.textContent = 'اطلاعات شما با موفقیت ثبت شد. متشکریم!';
+                    messageDisplay.classList.add('text-green-600');
+                    form.reset(); // Clear the form
+                } else {
+                    // Handle server-side error
+                    throw new Error(data.message || 'خطایی در سرور رخ داد.');
+                }
+            })
+            .catch(error => {
+                // Handle network or other errors
+                console.error('Error!', error.message);
+                messageDisplay.textContent = 'خطا در ارسال اطلاعات. لطفاً دوباره تلاش کنید.';
+                messageDisplay.classList.add('text-red-600');
+            })
+            .finally(() => {
+                // Re-enable the button
+                submitButton.disabled = false;
+                submitButton.textContent = 'ارسال اطلاعات';
+            });
+        });
+    </script>
+
+</body>
+</html>
